@@ -49,3 +49,5 @@ coverage/
 # Misc
 .cache/
 .next/
+
+.project-requirements.md 
