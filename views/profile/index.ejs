@@ -38,15 +38,29 @@
         <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
           <div class="flex flex-col space-y-2">
             <% if (user.google_id) { %>
-              <div class="flex items-center">
-                <i class="fab fa-google text-red-500 mr-2"></i>
-                <span>Google Account Connected</span>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <i class="fab fa-google text-red-500 mr-2"></i>
+                  <span>Google Account Connected</span>
+                </div>
+                <form action="/profile/disconnect/google" method="POST" onsubmit="return confirm('Are you sure you want to disconnect your Google account?');">
+                  <button type="submit" class="text-sm text-red-600 hover:text-red-800">
+                    <i class="fas fa-unlink mr-1"></i> Disconnect
+                  </button>
+                </form>
               </div>
             <% } %>
             <% if (user.github_id) { %>
-              <div class="flex items-center">
-                <i class="fab fa-github text-gray-800 mr-2"></i>
-                <span>GitHub Account Connected</span>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <i class="fab fa-github text-gray-800 mr-2"></i>
+                  <span>GitHub Account Connected</span>
+                </div>
+                <form action="/profile/disconnect/github" method="POST" onsubmit="return confirm('Are you sure you want to disconnect your GitHub account?');">
+                  <button type="submit" class="text-sm text-red-600 hover:text-red-800">
+                    <i class="fas fa-unlink mr-1"></i> Disconnect
+                  </button>
+                </form>
               </div>
             <% } %>
           </div>
