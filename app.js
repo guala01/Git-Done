@@ -3,6 +3,7 @@ const express = require('express');
 const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const GitHubStrategy = require('passport-github2').Strategy; // Add this line
 const methodOverride = require('method-override');
 const path = require('path');
 const { Pool } = require('pg');
@@ -48,6 +49,12 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Add this middleware to make user available to all templates
+app.use((req, res, next) => {
+  res.locals.user = req.user || null;
+  next();
+});
+
 // Passport Google OAuth Strategy
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
@@ -70,6 +77,66 @@ passport.use(new GoogleStrategy({
     const newUser = await db.query(
       'INSERT INTO users (google_id, email, name, avatar_url) VALUES ($1, $2, $3, $4) RETURNING *',
       [profile.id, profile.emails[0].value, profile.displayName, profile.photos[0].value]
+    );
+
+    return done(null, newUser.rows[0]);
+  } catch (error) {
+    return done(error, null);
+  }
+}));
+
+// Add GitHub OAuth Strategy
+passport.use(new GitHubStrategy({
+  clientID: process.env.GITHUB_CLIENT_ID,
+  clientSecret: process.env.GITHUB_CLIENT_SECRET,
+  callbackURL: process.env.GITHUB_CALLBACK_URL
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    // Store GitHub access token for API calls
+    const githubToken = accessToken;
+    
+    // Check if user exists
+    const existingUser = await db.query(
+      'SELECT * FROM users WHERE github_id = $1',
+      [profile.id]
+    );
+
+    if (existingUser.rows.length) {
+      // Update the GitHub token
+      await db.query(
+        'UPDATE users SET github_token = $1, updated_at = NOW() WHERE github_id = $2 RETURNING *',
+        [githubToken, profile.id]
+      );
+      return done(null, existingUser.rows[0]);
+    }
+
+    // Check if user exists with the same email
+    if (profile.emails && profile.emails.length > 0) {
+      const userByEmail = await db.query(
+        'SELECT * FROM users WHERE email = $1',
+        [profile.emails[0].value]
+      );
+
+      if (userByEmail.rows.length) {
+        // Link GitHub account to existing user
+        const updatedUser = await db.query(
+          'UPDATE users SET github_id = $1, github_token = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
+          [profile.id, githubToken, userByEmail.rows[0].id]
+        );
+        return done(null, updatedUser.rows[0]);
+      }
+    }
+
+    // Create new user
+    const newUser = await db.query(
+      'INSERT INTO users (github_id, email, name, avatar_url, github_token) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [
+        profile.id, 
+        profile.emails ? profile.emails[0].value : null, 
+        profile.displayName || profile.username,
+        profile.photos ? profile.photos[0].value : null,
+        githubToken
+      ]
     );
 
     return done(null, newUser.rows[0]);
@@ -106,6 +173,17 @@ app.get('/auth/google/callback',
   }
 );
 
+app.get('/auth/github',
+  passport.authenticate('github', { scope: ['user:email', 'repo'] })
+);
+
+app.get('/auth/github/callback',
+  passport.authenticate('github', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
+
 app.get('/logout', (req, res) => {
   req.logout((err) => {
     if (err) { return next(err); }
@@ -115,13 +193,15 @@ app.get('/logout', (req, res) => {
 
 // Import routes
 const authRoutes = require('./routes/auth');
-const taskRoutes = require('./routes/tasks');
-const projectRoutes = require('./routes/projects');
+const tasksRoutes = require('./routes/tasks');
+const projectsRoutes = require('./routes/projects');
+const profileRoutes = require('./routes/profile'); // Add this line
 
 // Use routes
 app.use('/auth', authRoutes);
-app.use('/tasks', taskRoutes);
-app.use('/projects', projectRoutes);
+app.use('/tasks', tasksRoutes);
+app.use('/projects', projectsRoutes);
+app.use('/profile', profileRoutes); // Add this line
 
 // Home route
 app.get('/', async (req, res) => {
