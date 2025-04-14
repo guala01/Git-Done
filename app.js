@@ -13,12 +13,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Database connection
+// Find the database connection code in your app.js and update it to:
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
   }
 });
+
+// Make sure any other database connection code is also updated
 
 // Middleware
 app.use(express.json());
@@ -58,8 +61,8 @@ passport.use(new GoogleStrategy({
   callbackURL: process.env.GOOGLE_CALLBACK_URL
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    // Check if user exists in database
-    const existingUser = await pool.query(
+    // Use db.query instead of direct pool queries
+    const result = await db.query(
       'SELECT * FROM users WHERE google_id = $1',
       [profile.id]
     );
