@@ -1,0 +1,126 @@
+<%- contentFor('body') %>
+<% /* Set title and active variables for the layout */ %>
+<% var title = 'Edit Task'; %>
+<% var active = 'tasks'; %>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
+    <!-- Back Button -->
+    <div class="mb-6">
+      <a href="/tasks/<%= task.id %>" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Task
+      </a>
+    </div>
+    
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">Edit Task</h1>
+    
+    <form action="/tasks/<%= task.id %>?_method=PUT" method="POST" class="p-6">
+      <!-- Title -->
+      <div class="mb-4">
+        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+        <input type="text" id="title" name="title" value="<%= task.title %>" required
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+      </div>
+      
+      <!-- Description -->
+      <div class="mb-4">
+        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+        <textarea id="description" name="description" rows="3"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"><%= task.description || '' %></textarea>
+      </div>
+      
+      <!-- Due Date -->
+      <div class="mb-4">
+        <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date</label>
+        <input type="date" id="due_date" name="due_date" value="<%= task.due_date ? task.due_date.toISOString().split('T')[0] : '' %>"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+      </div>
+      
+      <!-- Priority -->
+      <div class="mb-4">
+        <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
+        <select id="priority" name="priority"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+          <option value="" <%= !task.priority ? 'selected' : '' %>>None</option>
+          <option value="low" <%= task.priority === 'low' ? 'selected' : '' %>>Low</option>
+          <option value="medium" <%= task.priority === 'medium' ? 'selected' : '' %>>Medium</option>
+          <option value="high" <%= task.priority === 'high' ? 'selected' : '' %>>High</option>
+        </select>
+      </div>
+      
+      <!-- Time Estimate -->
+      <div class="mb-4">
+        <label for="time_estimate" class="block text-sm font-medium text-gray-700">Time Estimate (minutes)</label>
+        <input type="number" id="time_estimate" name="time_estimate" value="<%= task.time_estimate || '' %>"
+               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+      </div>
+      
+      <!-- Task Type -->
+      <div class="mb-4">
+        <label for="task_type" class="block text-sm font-medium text-gray-700">Task Type</label>
+        <select id="task_type" name="task_type"
+                class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+          <option value="" <%= !task.task_type ? 'selected' : '' %>>None</option>
+          <option value="feature" <%= task.task_type === 'feature' ? 'selected' : '' %>>Feature</option>
+          <option value="bug" <%= task.task_type === 'bug' ? 'selected' : '' %>>Bug</option>
+          <option value="documentation" <%= task.task_type === 'documentation' ? 'selected' : '' %>>Documentation</option>
+          <option value="test" <%= task.task_type === 'test' ? 'selected' : '' %>>Test</option>
+          <option value="other" <%= task.task_type === 'other' ? 'selected' : '' %>>Other</option>
+        </select>
+      </div>
+      
+      <!-- Code Snippet -->
+      <div class="mb-4">
+        <label for="code_snippet" class="block text-sm font-medium text-gray-700">Code Snippet</label>
+        <textarea id="code_snippet" name="code_snippet" rows="3"
+                  class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 font-mono"><%= task.code_snippet || '' %></textarea>
+      </div>
+      
+      <!-- Completed Status -->
+      <div class="mb-4">
+        <div class="flex items-center">
+          <input type="checkbox" id="completed" name="completed" <%= task.completed ? 'checked' : '' %>
+                 class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+          <label for="completed" class="ml-2 block text-sm text-gray-900">
+            Mark as completed
+          </label>
+        </div>
+      </div>
+      
+      <!-- Project Selection -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Assign to Projects</label>
+        <div class="space-y-2 max-h-60 overflow-y-auto p-2 border border-gray-300 rounded-md">
+          <% if (projects && projects.length > 0) { %>
+            <% projects.forEach(project => { %>
+              <div class="flex items-center">
+                <input type="checkbox" id="project_<%= project.id %>" name="project_ids[]" value="<%= project.id %>" 
+                       <%= task.project_ids && task.project_ids.includes(project.id) ? 'checked' : '' %>
+                       class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                <label for="project_<%= project.id %>" class="ml-2 block text-sm text-gray-900">
+                  <%= project.name %>
+                </label>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <p class="text-sm text-gray-500">No projects available. <a href="/projects/new" class="text-primary-600 hover:text-primary-500">Create a project</a> first.</p>
+          <% } %>
+        </div>
+      </div>
+      
+      <!-- Submit Button -->
+      <div class="flex justify-end">
+        <!-- In the edit page, update the cancel button -->
+        <a href="/tasks<%= req.query ? '?' + new URLSearchParams(req.query).toString() : '' %>" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-gray-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+          Cancel
+        </a>
+        <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+          Update Task
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

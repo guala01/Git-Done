@@ -1,0 +1,207 @@
+<%- contentFor('body') %>
+<% /* Set title and active variables for the layout */ %>
+<% var title = 'My Tasks'; %>
+<% var active = 'tasks'; %>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">My Tasks</h1>
+    <a href="/tasks/new" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+      <i class="fas fa-plus mr-2"></i> New Task
+    </a>
+  </div>
+  
+  <!-- Task Filters -->
+  <div class="bg-white shadow rounded-lg mb-6 p-4">
+    <form action="/tasks" method="GET" class="flex flex-wrap items-end gap-4">
+      <div class="flex flex-wrap items-end gap-4 flex-grow">
+        <!-- Priority Filter -->
+        <div class="w-full sm:w-auto flex-grow">
+          <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+          <select id="priority" name="priority" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
+            <option value="all" <%= priority === 'all' ? 'selected' : '' %>>All Priorities</option>
+            <option value="high" <%= priority === 'high' ? 'selected' : '' %>>High</option>
+            <option value="medium" <%= priority === 'medium' ? 'selected' : '' %>>Medium</option>
+            <option value="low" <%= priority === 'low' ? 'selected' : '' %>>Low</option>
+          </select>
+        </div>
+        
+        <!-- Task Type Filter -->
+        <div class="w-full sm:w-auto flex-grow">
+          <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Task Type</label>
+          <select id="type" name="type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
+            <option value="all" <%= type === 'all' ? 'selected' : '' %>>All Types</option>
+            <option value="feature" <%= type === 'feature' ? 'selected' : '' %>>Feature</option>
+            <option value="bug" <%= type === 'bug' ? 'selected' : '' %>>Bug</option>
+            <option value="documentation" <%= type === 'documentation' ? 'selected' : '' %>>Documentation</option>
+            <option value="research" <%= type === 'research' ? 'selected' : '' %>>Research</option>
+            <option value="other" <%= type === 'other' ? 'selected' : '' %>>Other</option>
+          </select>
+        </div>
+        
+        <!-- Project Filter -->
+        <div class="w-full sm:w-auto flex-grow">
+          <label for="project" class="block text-sm font-medium text-gray-700 mb-1">Project</label>
+          <select id="project" name="project" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
+            <option value="all">All Projects</option>
+            <% if (typeof projects !== 'undefined' && projects.length > 0) { %>
+              <% projects.forEach(function(proj) { %>
+                <option value="<%= proj.id %>" <%= project === proj.id.toString() ? 'selected' : '' %>><%= proj.name %></option>
+              <% }); %>
+            <% } %>
+          </select>
+        </div>
+        
+        <!-- Status Filter -->
+        <div class="w-full sm:w-auto flex-grow">
+          <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+          <select id="status" name="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md">
+            <option value="all" <%= status === 'all' ? 'selected' : '' %>>All Tasks</option>
+            <option value="open" <%= status === 'open' ? 'selected' : '' %>>Open Tasks</option>
+            <option value="completed" <%= status === 'completed' ? 'selected' : '' %>>Completed Tasks</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Filter Button -->
+      <div class="w-full sm:w-auto mt-6">
+        <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+          <i class="fas fa-filter mr-2"></i> Apply Filters
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  <!-- Task List (Keep your existing task list code) -->
+  <div class="bg-white rounded-lg shadow-md overflow-hidden">
+    <% if (tasks && tasks.length > 0) { %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Projects</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% tasks.forEach(task => { %>
+              <tr class="hover:bg-gray-50">
+                <!-- Status -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <% if (task.completed_at) { %>
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Completed</span>
+                    <% } else { %>
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">In Progress</span>
+                    <% } %>
+                  </div>
+                </td>
+                
+                <!-- Title -->
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900">
+                    <a href="/tasks/<%= task.id %>" class="hover:text-primary-600">
+                      <%= task.title %>
+                    </a>
+                  </div>
+                  <% if (task.description) { %>
+                    <div class="text-sm text-gray-500 truncate max-w-xs">
+                      <%= task.description %>
+                    </div>
+                  <% } %>
+                </td>
+                
+                <!-- Priority -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% if (task.priority) { %>
+                    <% if (task.priority == 1) { %>
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">High</span>
+                    <% } else if (task.priority == 2) { %>
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-orange-100 text-orange-800">Medium</span>
+                    <% } else { %>
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Low</span>
+                    <% } %>
+                  <% } else { %>
+                    <span class="text-gray-400 text-sm">-</span>
+                  <% } %>
+                </td>
+                
+                <!-- Type -->
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= task.task_type || '-' %>
+                </td>
+                
+                <!-- Due Date -->
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <% if (task.due_date) { %>
+                    <% 
+                      const dueDate = new Date(task.due_date);
+                      const today = new Date();
+                      const isPastDue = dueDate < today && !task.completed_at;
+                      const formattedDate = dueDate.toLocaleDateString();
+                    %>
+                    <span class="<%= isPastDue ? 'text-red-600 font-medium' : '' %>">
+                      <%= formattedDate %>
+                    </span>
+                  <% } else { %>
+                    -
+                  <% } %>
+                </td>
+                
+                <!-- Projects -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% if (task.project_names && task.project_names.length > 0 && task.project_names[0] !== null) { %>
+                    <div class="flex flex-wrap gap-1">
+                      <% task.project_names.forEach((name, index) => { %>
+                        <span class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-800">
+                          <%= name %>
+                        </span>
+                      <% }); %>
+                    </div>
+                  <% } else { %>
+                    <span class="text-gray-400 text-sm">-</span>
+                  <% } %>
+                </td>
+                
+                <!-- Actions -->
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <div class="flex space-x-2">
+                    <a href="/tasks/<%= task.id %>/edit" class="text-indigo-600 hover:text-indigo-900">
+                      Edit
+                    </a>
+                    <form action="/tasks/<%= task.id %>/toggle" method="POST" class="inline">
+                      <button type="submit" class="text-green-600 hover:text-green-900">
+                        <%= task.completed_at ? 'Reopen' : 'Complete' %>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="p-8 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <h3 class="mt-2 text-lg font-medium text-gray-900">No tasks found</h3>
+        <p class="mt-1 text-gray-500">Get started by creating your first task.</p>
+        <div class="mt-6">
+          <a href="/tasks/new" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Create a task
+          </a>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>

@@ -1,0 +1,216 @@
+<%- contentFor('body') %>
+<% /* Set title and active variables for the layout */ %>
+<% var title = 'Dashboard'; %>
+<% var active = 'home'; %>
+
+<% /* --- EDIT START: Replace dark/glass styles with light mode styles --- */ %>
+<div class="bg-white border border-gray-200 shadow-md overflow-hidden sm:rounded-lg mb-6">
+  <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+    <div>
+      <% /* Update text colors for light mode */ %>
+      <h1 class="text-2xl font-bold text-gray-800">Welcome to GitDone</h1>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">Task management designed for coders</p>
+    </div>
+<% /* --- EDIT END --- */ %>
+    <% if (user) { %>
+      <% /* Keep existing button styling */ %>
+      <a href="/tasks/new" class="btn btn-primary glow-purple">
+        <i class="fas fa-plus mr-2"></i> New Task
+      </a>
+    <% } %>
+  </div>
+</div>
+
+<% if (!user) { %>
+  <!-- Not logged in view -->
+  <% /* --- EDIT START: Replace dark/glass styles with light mode styles --- */ %>
+  <div class="bg-white border border-gray-200 shadow-md sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+      <% /* Update text colors for light mode */ %>
+      <h3 class="text-lg leading-6 font-medium text-gray-900">Get started with GitDone</h3>
+      <div class="mt-2 max-w-xl text-sm text-gray-500">
+        <p>Sign in to start managing your coding tasks efficiently.</p>
+      </div>
+  <% /* --- EDIT END --- */ %>
+      <div class="mt-5">
+        <a href="/auth/login" class="btn btn-primary">
+          <i class="fas fa-sign-in-alt mr-2"></i> Sign in with Google
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features showcase -->
+  <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <% /* --- EDIT START: Replace glass-card and related styles --- */ %>
+    <div class="bg-white border border-gray-200 overflow-hidden shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex items-center">
+          <% /* Update icon background and text colors */ %>
+          <div class="flex-shrink-0 bg-primary-100 rounded-md p-3 border border-primary-200">
+            <i class="fas fa-tasks text-primary-600 text-xl"></i>
+          </div>
+          <div class="ml-5">
+            <h3 class="text-lg font-medium text-gray-900">Task Management</h3>
+            <p class="mt-2 text-sm text-gray-500">Create, organize, and track your coding tasks with ease.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 overflow-hidden shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex items-center">
+           <% /* Update icon background and text colors */ %>
+          <div class="flex-shrink-0 bg-indigo-100 rounded-md p-3 border border-indigo-200">
+            <i class="fas fa-project-diagram text-indigo-600 text-xl"></i>
+          </div>
+          <div class="ml-5">
+            <h3 class="text-lg font-medium text-gray-900">Project Organization</h3>
+            <p class="mt-2 text-sm text-gray-500">Group related tasks into projects for better organization.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-gray-200 overflow-hidden shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex items-center">
+           <% /* Update icon background and text colors */ %>
+          <div class="flex-shrink-0 bg-violet-100 rounded-md p-3 border border-violet-200">
+            <i class="fas fa-code text-violet-600 text-xl"></i>
+          </div>
+          <div class="ml-5">
+            <h3 class="text-lg font-medium text-gray-900">Code Snippets</h3>
+            <p class="mt-2 text-sm text-gray-500">Attach code snippets directly to your tasks for reference.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% /* --- EDIT END --- */ %>
+  </div>
+<% } else { %>
+  <!-- Dashboard for logged in users -->
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <!-- Recent Tasks -->
+    <% /* --- EDIT START: Replace dark/glass styles with light mode styles --- */ %>
+    <div class="bg-white border border-gray-200 shadow-md sm:rounded-lg overflow-hidden">
+      <div class="px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-200">
+        <h2 class="text-lg font-medium text-gray-900">Recent Tasks</h2>
+        <a href="/tasks" class="text-sm font-medium text-primary-600 hover:text-primary-500 transition-colors duration-200">View all</a>
+      </div>
+      <div class="px-4 py-5 sm:p-0">
+        <ul class="divide-y divide-gray-200">
+          <% if (recentTasks && recentTasks.length > 0) { %>
+            <% recentTasks.forEach(task => { %>
+              <li class="py-4 sm:py-5 px-4 sm:px-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-900">
+                      <a href="/tasks/<%= task.id %>" class="hover:underline"><%= task.title %></a>
+                    </h3>
+                    <% if (task.project_names && task.project_names.length > 0 && task.project_names[0]) { %>
+                      <div class="mt-1 flex items-center">
+                        <span class="text-xs text-gray-500">Project: <%= task.project_names.join(', ') %></span>
+                      </div>
+                    <% } %>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <% /* Update badge styles for light mode */ %>
+                    <% if (task.completed) { %>
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 border border-green-300">Completed</span>
+                    <% } else { %>
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 border border-yellow-300">Open</span>
+                    <% } %>
+                    <% if (task.priority) { %>
+                       <% 
+                         let priorityClass = 'bg-gray-100 text-gray-800 border-gray-300'; 
+                         let priorityText = 'Low';
+                         // Assuming priority is integer 1 (High), 2 (Medium), 3 (Low)
+                         if (task.priority == 1) { 
+                           priorityClass = 'bg-red-100 text-red-800 border-red-300';
+                           priorityText = 'High';
+                         } else if (task.priority == 2) {
+                           priorityClass = 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                           priorityText = 'Medium';
+                         } else if (task.priority == 3) {
+                            // Use default low priority styles
+                         }
+                       %>
+                      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full border <%= priorityClass %>">
+                        <%= priorityText %>
+                      </span>
+                    <% } %>
+                  </div>
+                </div>
+              </li>
+            <% }); %>
+          <% } else { %>
+            <li class="py-4 sm:py-5 px-4 sm:px-6">
+              <p class="text-sm text-gray-500">No tasks found. Create your first task to get started!</p>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+    <% /* --- EDIT END --- */ %>
+
+    <!-- Projects -->
+    <% /* --- EDIT START: Replace dark/glass styles with light mode styles --- */ %>
+    <div class="bg-white border border-gray-200 shadow-md sm:rounded-lg overflow-hidden">
+      <div class="px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-200">
+        <h2 class="text-lg font-medium text-gray-900">Your Projects</h2>
+        <a href="/projects" class="text-sm font-medium text-primary-600 hover:text-primary-500 transition-colors duration-200">View all</a>
+      </div>
+      <div class="px-4 py-5 sm:p-0">
+        <ul class="divide-y divide-gray-200">
+          <% if (userProjects && userProjects.length > 0) { %>
+            <% userProjects.forEach(project => { %>
+              <li class="py-4 sm:py-5 px-4 sm:px-6">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h3 class="text-sm font-medium text-gray-900">
+                      <a href="/projects/<%= project.id %>" class="hover:underline"><%= project.name %></a>
+                    </h3>
+                    <div class="mt-1 flex items-center">
+                      <span class="text-xs text-gray-500"><%= project.task_count %> tasks</span>
+                    </div>
+                  </div>
+                  <!-- Add actions if needed -->
+                </div>
+              </li>
+            <% }); %>
+          <% } else { %>
+            <li class="py-4 sm:py-5 px-4 sm:px-6">
+              <p class="text-sm text-gray-500">No projects found. Create your first project to get started!</p>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+   <% /* Update card styles to light mode */ %>
+  <div class="mt-6 bg-white border border-gray-200 shadow-md sm:rounded-lg">
+    <div class="px-4 py-5 sm:p-6">
+       <% /* Update text colors */ %>
+      <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+       <% /* Note: Button styles (btn, btn-*) are kept as they might be defined elsewhere */ %>
+      <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <a href="/tasks/new" class="btn btn-primary w-full justify-center">
+          <i class="fas fa-plus mr-2"></i> New Task
+        </a>
+        <a href="/projects/new" class="btn btn-secondary w-full justify-center">
+          <i class="fas fa-folder-plus mr-2"></i> New Project
+        </a>
+        <a href="/tasks?filter=pending" class="btn btn-gray w-full justify-center">
+          <i class="fas fa-list-check mr-2"></i> Pending Tasks
+        </a>
+        <a href="/tasks?filter=completed" class="btn btn-success w-full justify-center">
+          <i class="fas fa-check-double mr-2"></i> Completed Tasks
+        </a>
+      </div>
+    </div>
+  </div>
+<% } %>

@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom z-index utilities */
+.z-100 {
+  z-index: 100;
+}
+
+.z-1000 {
+  z-index: 1000;
+}
+
+.z-9999 {
+  z-index: 9999;
+}
+
+/* Additional custom styles can go here */

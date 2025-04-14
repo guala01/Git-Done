@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles beyond Tailwind */
+
+/* Dark mode styles */
+.dark body {
+  @apply bg-dark-400 text-gray-100;
+}
+
+/* Modern card styling with glassmorphism */
+.dark .card {
+  @apply bg-dark-300/80 backdrop-blur-sm border border-dark-glass-border text-gray-100 shadow-lg;
+}
+
+.dark .card-header {
+  @apply bg-dark-400/50 border-dark-glass-border;
+}
+
+.dark .card-body {
+  @apply bg-transparent;
+}
+
+.dark .card-footer {
+  @apply bg-dark-400/50 border-dark-glass-border;
+}
+
+/* Modern button styling */
+.dark .btn-primary {
+  @apply bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-700 hover:to-purple-900 border-0;
+}
+
+.dark .btn-secondary {
+  @apply bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 border-0;
+}
+
+.dark .btn-success {
+  @apply bg-gradient-to-r from-green-600 to-green-800 hover:from-green-700 hover:to-green-900 border-0;
+}
+
+.dark .btn-gray {
+  @apply bg-gradient-to-r from-gray-600 to-gray-800 hover:from-gray-700 hover:to-gray-900 border-0;
+}
+
+/* Code snippet styling */
+.code-snippet {
+  @apply font-mono text-sm bg-gray-800 text-gray-100 p-4 rounded-md overflow-x-auto;
+}
+
+/* Task priority indicators */
+.priority-high {
+  @apply bg-red-100 text-red-800 border-red-300;
+}
+
+.priority-medium {
+  @apply bg-yellow-100 text-yellow-800 border-yellow-300;
+}
+
+.priority-low {
+  @apply bg-green-100 text-green-800 border-green-300;
+}
+
+/* Task type badges */
+.task-type {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.task-type-bug {
+  @apply bg-red-100 text-red-800;
+}
+
+.task-type-feature {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.task-type-refactor {
+  @apply bg-purple-100 text-purple-800;
+}
+
+.task-type-chore {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.task-type-research {
+  @apply bg-green-100 text-green-800;
+}
+
+/* Project tags */
+.project-tag {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-100 text-secondary-800;
+}
+
+/* Completed task styling */
+.task-completed {
+  @apply line-through text-gray-500;
+}
+
+/* Custom form styling */
+.form-input {
+  @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500;
+}
+
+.form-textarea {
+  @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500;
+}
+
+.form-select {
+  @apply mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500;
+}
+
+.btn {
+  @apply inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-primary {
+  @apply bg-primary-600 hover:bg-primary-700 focus:ring-primary-500;
+}
+
+.btn-secondary {
+  @apply bg-secondary-600 hover:bg-secondary-700 focus:ring-secondary-500;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 focus:ring-red-500;
+}
+
+.btn-success {
+  @apply bg-green-600 hover:bg-green-700 focus:ring-green-500;
+}
+
+.btn-gray {
+  @apply bg-gray-600 hover:bg-gray-700 focus:ring-gray-500;
+}
+
+/* Card styling */
+.card {
+  @apply bg-white overflow-hidden shadow rounded-lg transition-all duration-300;
+}
+
+.card-header {
+  @apply px-4 py-5 sm:px-6 bg-gray-50 border-b border-gray-200;
+}
+
+.card-body {
+  @apply px-4 py-5 sm:p-6;
+}
+
+.card-footer {
+  @apply px-4 py-4 sm:px-6 bg-gray-50 border-t border-gray-200;
+}
+
+/* Modern 2025 UI elements */
+.glass-card {
+  @apply backdrop-blur-md bg-white/10 border border-white/20 rounded-xl shadow-xl;
+}
+
+.floating-card {
+  @apply hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+}
+
+.glow-purple {
+  @apply hover:shadow-purple-500/20 hover:shadow-lg;
+}
+
+/* Sidebar styling */
+.sidebar {
+  @apply bg-gray-800 text-white w-64 flex-shrink-0 hidden md:block;
+}
+
+.sidebar-item {
+  @apply flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white;
+}
+
+.sidebar-item-active {
+  @apply bg-gray-900 text-white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    @apply px-4;
+  }
+}

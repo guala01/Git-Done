@@ -1,0 +1,202 @@
+<%- contentFor('body') %>
+<% /* Set title and active variables for the layout */ %>
+<% var title = 'Task Details'; %>
+<% var active = 'tasks'; %>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Task Header -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800 mb-2"><%= task.title %></h1>
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+          <% if (task.project_names && task.project_names.length > 0) { %>
+            <div class="flex flex-wrap gap-1">
+              <% task.project_names.forEach((name, index) => { %>
+                <a href="/tasks/project/<%= task.project_ids[index] %>" class="px-2 py-1 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200">
+                  <%= name %>
+                </a>
+              <% }); %>
+            </div>
+          <% } %>
+          
+          <% if (task.task_type) { %>
+            <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-md">
+              <%= task.task_type %>
+            </span>
+          <% } %>
+          
+          <% if (task.priority) { %>
+            <span class="px-2 py-1 rounded-md
+              <% if (task.priority === 'high' || task.priority === '1') { %>
+                bg-red-100 text-red-800
+              <% } else if (task.priority === 'medium' || task.priority === '2') { %>
+                bg-yellow-100 text-yellow-800
+              <% } else { %>
+                bg-green-100 text-green-800
+              <% } %>
+            ">
+              <%= typeof task.priority === 'number' ? ['High', 'Medium', 'Low'][task.priority-1] : task.priority %>
+            </span>
+          <% } %>
+        </div>
+      </div>
+      
+      <div class="flex items-center space-x-2 mt-4 md:mt-0">
+        <!-- Task Status Toggle -->
+        <form action="/tasks/<%= task.id %>/toggle" method="POST" class="inline">
+          <button type="submit" class="px-3 py-1 rounded-md text-sm font-medium
+            <% if (task.completed) { %>
+              bg-green-100 text-green-800 hover:bg-green-200
+            <% } else { %>
+              bg-gray-100 text-gray-800 hover:bg-gray-200
+            <% } %>
+          ">
+            <%= task.completed ? 'Completed' : 'Mark Complete' %>
+          </button>
+        </form>
+        
+        <!-- Edit Button -->
+        <a href="/tasks/<%= task.id %>/edit" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200 text-sm font-medium">
+          Edit
+        </a>
+        
+        <!-- Delete Button -->
+        <form action="/tasks/<%= task.id %>?_method=DELETE" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this task?');">
+          <button type="submit" class="px-3 py-1 bg-red-100 text-red-800 rounded-md hover:bg-red-200 text-sm font-medium">
+            Delete
+          </button>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Task Content -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+      <!-- Task Details -->
+      <div class="p-6 border-b border-gray-200">
+        <% if (task.description) { %>
+          <div class="mb-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Description</h2>
+            <div class="prose max-w-none text-gray-700">
+              <%= task.description %>
+            </div>
+          </div>
+        <% } %>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Due Date -->
+          <% if (task.due_date) { %>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 mb-1">Due Date</h3>
+              <p class="text-gray-900"><%= new Date(task.due_date).toLocaleDateString() %></p>
+            </div>
+          <% } %>
+          
+          <!-- Time Estimate -->
+          <% if (task.time_estimate) { %>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 mb-1">Time Estimate</h3>
+              <p class="text-gray-900"><%= task.time_estimate %> minutes</p>
+            </div>
+          <% } %>
+          
+          <!-- Created At -->
+          <div>
+            <h3 class="text-sm font-medium text-gray-500 mb-1">Created</h3>
+            <p class="text-gray-900"><%= new Date(task.created_at).toLocaleString() %></p>
+          </div>
+          
+          <!-- Completed At -->
+          <% if (task.completed && task.completed_at) { %>
+            <div>
+              <h3 class="text-sm font-medium text-gray-500 mb-1">Completed</h3>
+              <p class="text-gray-900"><%= new Date(task.completed_at).toLocaleString() %></p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      
+      <!-- Code Snippet -->
+      <% if (task.code_snippet) { %>
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-800 mb-2">Code Snippet</h2>
+          <pre class="bg-gray-50 p-4 rounded-md overflow-x-auto text-sm font-mono"><%= task.code_snippet %></pre>
+        </div>
+      <% } %>
+      
+      <!-- Links -->
+      <% if (links && links.length > 0) { %>
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-800 mb-2">Links</h2>
+          <ul class="space-y-2">
+            <% links.forEach(link => { %>
+              <li>
+                <a href="<%= link.url %>" target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:text-primary-800 flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  <%= link.label || link.url %>
+                </a>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      <% } %>
+    </div>
+    
+    <!-- Subtasks -->
+    <% if (subtasks && subtasks.length > 0) { %>
+      <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+        <div class="p-6">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">Subtasks</h2>
+          <ul class="divide-y divide-gray-200">
+            <% subtasks.forEach(subtask => { %>
+              <li class="py-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <span class="<%= subtask.completed ? 'text-green-500' : 'text-gray-400' %> mr-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <% if (subtask.completed) { %>
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        <% } else { %>
+                          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z" clip-rule="evenodd" />
+                        <% } %>
+                      </svg>
+                    </span>
+                    <a href="/tasks/<%= subtask.id %>" class="text-gray-900 hover:text-primary-600">
+                      <%= subtask.title %>
+                    </a>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <form action="/tasks/<%= subtask.id %>/toggle" method="POST" class="inline">
+                      <button type="submit" class="text-xs px-2 py-1 rounded-md
+                        <% if (subtask.completed) { %>
+                          bg-green-100 text-green-800 hover:bg-green-200
+                        <% } else { %>
+                          bg-gray-100 text-gray-800 hover:bg-gray-200
+                        <% } %>
+                      ">
+                        <%= subtask.completed ? 'Completed' : 'Complete' %>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      </div>
+    <% } %>
+    
+    <!-- Back Button -->
+    <!-- Near the top of the file, update the back button -->
+    <div class="mb-6">
+      <a href="<%= taskListReferer || '/tasks' %>" class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back to Tasks
+      </a>
+    </div>
+  </div>
+</div>

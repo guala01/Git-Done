@@ -1,0 +1,122 @@
+<%- contentFor('body') %>
+<% /* Set title and active variables for the layout */ %>
+<% var title = 'Create New Task'; %>
+<% var active = 'tasks'; %>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">Create New Task</h1>
+    
+    <form action="/tasks<%= req.originalUrl.includes('?') ? '?' + req.originalUrl.split('?')[1] : '' %>" method="POST" class="space-y-6">
+      <!-- Add hidden fields for each query parameter -->
+      <% if (req && req.query) { %>
+        <% Object.entries(req.query).forEach(([key, value]) => { %>
+          <input type="hidden" name="_query_<%= key %>" value="<%= value %>">
+        <% }); %>
+      <% } %>
+      
+      <!-- Task Title -->
+      <div class="space-y-2">
+        <label for="title" class="block text-sm font-medium text-gray-700">Title *</label>
+        <input type="text" id="title" name="title" required 
+               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+      </div>
+      
+      <!-- Description -->
+      <div class="space-y-2">
+        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+        <textarea id="description" name="description" rows="4" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"></textarea>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Due Date -->
+        <div class="space-y-2">
+          <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date</label>
+          <input type="datetime-local" id="due_date" name="due_date" 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+        </div>
+        
+        <!-- Priority -->
+        <div class="space-y-2">
+          <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
+          <select id="priority" name="priority" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+            <option value="">Select Priority</option>
+            <option value="1">High</option>
+            <option value="2">Medium</option>
+            <option value="3">Low</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Time Estimate -->
+        <div class="space-y-2">
+          <label for="time_estimate" class="block text-sm font-medium text-gray-700">Time Estimate (minutes)</label>
+          <input type="number" id="time_estimate" name="time_estimate" min="0" 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+        </div>
+        
+        <!-- Task Type -->
+        <div class="space-y-2">
+          <label for="task_type" class="block text-sm font-medium text-gray-700">Task Type</label>
+          <select id="task_type" name="task_type" 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+            <option value="">Select Type</option>
+            <option value="Bug">Bug</option>
+            <option value="Feature">Feature</option>
+            <option value="Refactor">Refactor</option>
+            <option value="Chore">Chore</option>
+            <option value="Research">Research</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Code Snippet -->
+      <div class="space-y-2">
+        <label for="code_snippet" class="block text-sm font-medium text-gray-700">Code Snippet</label>
+        <textarea id="code_snippet" name="code_snippet" rows="5" 
+                  class="font-mono w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"></textarea>
+      </div>
+      
+      <!-- Project Assignment -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">Assign to Projects</label>
+        <div class="max-h-48 overflow-y-auto p-2 border border-gray-300 rounded-md">
+          <% if (projects && projects.length > 0) { %>
+            <% projects.forEach(project => { %>
+              <div class="flex items-center mb-2">
+                <input type="checkbox" id="project_<%= project.id %>" name="project_ids[]" value="<%= project.id %>" 
+                       class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                <label for="project_<%= project.id %>" class="ml-2 block text-sm text-gray-900">
+                  <%= project.name %>
+                </label>
+              </div>
+            <% }); %>
+          <% } else { %>
+            <p class="text-sm text-gray-500">No projects available. <a href="/projects/new" class="text-primary-600 hover:text-primary-500">Create a project</a> first.</p>
+          <% } %>
+        </div>
+      </div>
+      
+      <!-- Parent Task (for subtasks) - Hidden for now, can be added later -->
+      <% if (typeof parentTask !== 'undefined' && parentTask) { %>
+        <input type="hidden" name="parent_id" value="<%= parentTask.id %>">
+        <div class="bg-gray-50 p-3 rounded-md">
+          <p class="text-sm text-gray-700">Creating subtask for: <strong><%= parentTask.title %></strong></p>
+        </div>
+      <% } %>
+      
+      <!-- Submit Button -->
+      <div class="flex justify-end">
+        <a href="/tasks<%= req.originalUrl.includes('?') ? '?' + req.originalUrl.split('?')[1] : '' %>" class="mr-4 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+          Cancel
+        </a>
+        <button type="submit" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+          Create Task
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
