@@ -7,21 +7,15 @@ const methodOverride = require('method-override');
 const path = require('path');
 const { Pool } = require('pg');
 const pgSession = require('connect-pg-simple')(session);
+const db = require('./db'); // Add this line to import the db module
 
 // Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Database connection
-// Find the database connection code in your app.js and update it to:
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
-
-// Make sure any other database connection code is also updated
+// Use the pool from the db module instead of creating a new one
+const pool = db.pool;
 
 // Middleware
 app.use(express.json());
@@ -62,7 +56,7 @@ passport.use(new GoogleStrategy({
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     // Use db.query instead of direct pool queries
-    const result = await db.query(
+    const existingUser = await db.query(
       'SELECT * FROM users WHERE google_id = $1',
       [profile.id]
     );
@@ -72,8 +66,8 @@ passport.use(new GoogleStrategy({
       return done(null, existingUser.rows[0]);
     }
 
-    // Create new user
-    const newUser = await pool.query(
+    // Create new user - also use db.query here
+    const newUser = await db.query(
       'INSERT INTO users (google_id, email, name, avatar_url) VALUES ($1, $2, $3, $4) RETURNING *',
       [profile.id, profile.emails[0].value, profile.displayName, profile.photos[0].value]
     );
@@ -92,7 +86,8 @@ passport.serializeUser((user, done) => {
 // Deserialize user from the session
 passport.deserializeUser(async (id, done) => {
   try {
-    const user = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    // Use db.query here too
+    const user = await db.query('SELECT * FROM users WHERE id = $1', [id]);
     done(null, user.rows[0]);
   } catch (error) {
     done(error, null);
@@ -135,8 +130,8 @@ app.get('/', async (req, res) => {
     let userProjects = [];
     
     if (req.user) {
-      // Fetch recent tasks for logged-in user
-      const tasksResult = await pool.query(
+      // Use db.query here too
+      const tasksResult = await db.query(
         `SELECT t.*, 
                 array_agg(DISTINCT p.name) FILTER (WHERE p.name IS NOT NULL) as project_names,
                 array_agg(DISTINCT p.id) FILTER (WHERE p.id IS NOT NULL) as project_ids,
@@ -152,8 +147,8 @@ app.get('/', async (req, res) => {
       );
       recentTasks = tasksResult.rows;
       
-      // Fetch user projects
-      const projectsResult = await pool.query(
+      // Use db.query here too
+      const projectsResult = await db.query(
         `SELECT p.*, COUNT(tp.task_id) as task_count
          FROM projects p
          LEFT JOIN task_projects tp ON p.id = tp.project_id
