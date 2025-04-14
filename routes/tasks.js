@@ -95,18 +95,35 @@ router.get('/', async (req, res) => {
 });
 
 // Get task creation form
-router.get('/new', async (req, res) => {
+// Find the route handler for GET /tasks/new and update it:
+
+// Current code (somewhere around line 106):
+router.get('/new', isAuthenticated, async (req, res) => {
   try {
-    // Get all projects for the user to allow assignment
-    const projects = await db.query(
+    // Fetch projects for the dropdown
+    const projectsResult = await db.query(
       'SELECT * FROM projects WHERE user_id = $1 ORDER BY name',
       [req.user.id]
     );
     
+    // Check if we're creating a subtask
+    let parentTask = null;
+    if (req.query.parent_id) {
+      const parentResult = await db.query(
+        'SELECT * FROM tasks WHERE id = $1 AND user_id = $2',
+        [req.query.parent_id, req.user.id]
+      );
+      if (parentResult.rows.length > 0) {
+        parentTask = parentResult.rows[0];
+      }
+    }
+    
+    // Render the form
     res.render('tasks/new', { 
-      user: req.user,
-      projects: projects.rows,
-      task: {}
+      projects: projectsResult.rows,
+      parentTask: parentTask,
+      // Add this line to pass the req object to the template
+      req: req
     });
   } catch (error) {
     console.error('Error loading task form:', error);
