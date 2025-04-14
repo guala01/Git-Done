@@ -50,4 +50,6 @@ coverage/
 .cache/
 .next/
 
-.project-requirements.md 
+.ideas.md
+project-requirements.md 
+ideas.md
